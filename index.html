@@ -1,358 +1,721 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sagara Hosting</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sagara Hosting — Dashboard Pro</title>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: radial-gradient(circle at center, #0b0c10 40%, #06070a 100%);
-      color: #c5c6c7;
-      overflow-x: hidden;
-      position: relative;
+    :root{
+      --bg:#0b0f17;
+      --panel:#0f1720;
+      --muted:#9aa8b3;
+      --accent-cyan:#66fcf1;
+      --accent-purple:#8a6cff;
+      --card-glass: rgba(255,255,255,0.03);
+      --glass-2: rgba(102,252,241,0.03);
+      --neon: 0 8px 28px rgba(102,252,241,0.06), inset 0 1px 0 rgba(255,255,255,0.02);
+      font-synthesis: none;
     }
-    canvas#particles {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: -1;
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+    body{
+      background: linear-gradient(180deg,#071018 0%, #05060a 100%);
+      color:#e6eef3;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      overflow-y:auto;
     }
-    header {
-      text-align: center;
-      padding: 30px 10px;
-      color: #66fcf1;
-      font-size: 2.2em;
-      font-weight: bold;
-      text-shadow: 0 0 15px #45a29e;
-      letter-spacing: 2px;
+
+    /* Layout */
+    .app {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 28px;
+      min-height:100vh;
+      padding:28px;
     }
-    .dashboard {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-      margin: 20px auto;
-      max-width: 1200px;
+
+    /* Sidebar */
+    .sidebar {
+      background: linear-gradient(180deg,var(--panel), rgba(11,15,23,0.95));
+      border-radius:12px;
+      padding:20px;
+      box-shadow: var(--neon);
+      display:flex;
+      flex-direction:column;
+      gap:18px;
     }
+    .brand {
+      font-weight:700;
+      color:var(--accent-cyan);
+      letter-spacing:0.6px;
+      font-size:18px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .brand .dot{
+      width:12px;height:12px;border-radius:3px;background:linear-gradient(90deg,var(--accent-cyan),var(--accent-purple));
+      box-shadow:0 6px 18px rgba(106,220,210,0.12);
+    }
+    .sidebar .menu {
+      margin-top:6px;
+      display:flex;flex-direction:column;gap:6px;
+    }
+    .menu button {
+      background:transparent;border:0;color:var(--muted);text-align:left;padding:12px;border-radius:8px;cursor:pointer;font-weight:600;
+      display:flex;align-items:center;gap:12px;transition:all .18s;
+    }
+    .menu button:hover{background:rgba(255,255,255,0.02);color:var(--accent-cyan)}
+    .menu button.active{background:linear-gradient(90deg,rgba(102,252,241,0.06), rgba(138,108,255,0.03)); color:var(--accent-cyan); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);}
+
+    .menu button .badge {
+      margin-left:auto;background:rgba(255,255,255,0.04);padding:4px 8px;border-radius:999px;font-size:12px;color:var(--muted);
+    }
+
+    .sidebar .foot {
+      margin-top:auto;font-size:13px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;
+    }
+
+    /* Main area */
+    .main {
+      padding:18px;
+    }
+    .topbar {
+      display:flex;align-items:center;gap:18px;justify-content:space-between;margin-bottom:18px;
+    }
+    .search {
+      background:var(--card-glass);padding:10px 12px;border-radius:12px;display:flex;gap:12px;align-items:center;width:60%;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+    }
+    .search input{
+      background:transparent;border:0;outline:none;color:var(--muted);width:100%;font-weight:600;
+    }
+    .profile {
+      display:flex;align-items:center;gap:12px;
+    }
+    .profile .avatar {
+      width:42px;height:42px;border-radius:10px;background:linear-gradient(90deg,#2b3340,#091016);display:flex;align-items:center;justify-content:center;
+      color:var(--accent-cyan);font-weight:700;border:1px solid rgba(255,255,255,0.03);
+    }
+
+    /* Grid content */
+    .grid {
+      display:grid;
+      grid-template-columns: 1fr 380px;
+      gap:20px;
+    }
+
+    /* Cards and charts */
     .card {
-      background: rgba(31,40,51,0.85);
-      border-radius: 14px;
-      padding: 20px;
-      flex: 1 1 350px;
-      box-shadow: 0 0 20px rgba(69,162,158,0.3);
-      backdrop-filter: blur(8px);
-      transition: 0.3s ease;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.015));
+      border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.03);box-shadow: 0 6px 18px rgba(2,8,23,0.6);
     }
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 0 25px #45a29e;
+
+    .kpis { display:flex; gap:12px; margin-bottom:12px; }
+    .kpi {
+      flex:1;background:linear-gradient(180deg, rgba(102,252,241,0.02), rgba(138,108,255,0.02));padding:12px;border-radius:10px;
+      display:flex;flex-direction:column;gap:6px;
     }
-    .terminal {
-      background: #000;
-      color: #0f0;
-      font-family: "Courier New", monospace;
-      height: 250px;
-      border-radius: 8px;
-      padding: 15px;
-      overflow-y: auto;
-      white-space: pre-line;
-      box-shadow: inset 0 0 10px #0f0;
-    }
-    canvas { width: 100%; height: 200px; }
+    .kpi .label { font-size:12px;color:var(--muted); }
+    .kpi .value { font-size:20px;font-weight:800;color:var(--accent-cyan); }
+
+    /* Chart container */
+    .chartWrap { height:220px; }
+
+    /* right column small cards */
+    .small-card { display:flex;flex-direction:column;gap:12px; }
+
+    .donut { display:flex;align-items:center;gap:12px;justify-content:space-between }
+    .donut canvas{ width:120px;height:120px; }
+
+    /* Pricing area */
     .prices {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-      margin: 50px auto;
-      max-width: 1200px;
+      display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;
     }
     .price-card {
-      background: rgba(31,40,51,0.9);
-      border: 1px solid #45a29e;
-      border-radius: 12px;
-      padding: 20px;
-      width: 220px;
-      text-align: center;
-      transition: 0.3s;
-      box-shadow: 0 0 10px rgba(102,252,241,0.3);
+      width: 220px; padding:16px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.02); box-shadow: 0 10px 30px rgba(12,16,22,0.6);
+      display:flex;flex-direction:column;gap:10px;
     }
-    .price-card:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 25px #66fcf1;
+    .price-card h4{ margin:0;color:var(--accent-purple); }
+    .price-card .price { font-weight:800;color:var(--accent-cyan); font-size:18px; }
+    .price-card ul{ margin:0;padding-left:16px;color:var(--muted); font-size:13px; }
+    .price-card .buy { margin-top:auto; display:inline-block;padding:10px 12px;border-radius:8px;text-align:center;background:linear-gradient(90deg,var(--accent-cyan),var(--accent-purple)); color:#041018;font-weight:700;text-decoration:none;cursor:pointer; }
+
+    /* Terminal */
+    .terminal {
+      background:#030405;border-radius:8px;padding:14px;height:260px;overflow:auto;font-family:ui-monospace, SFMono-Regular, Menlo, monospace;color:#66fcf1;
+      box-shadow: inset 0 2px 18px rgba(102,252,241,0.03);
+      border:1px solid rgba(102,252,241,0.06);
+      font-size:13px;line-height:1.45;
     }
-    .price-card h3 { color: #66fcf1; margin-bottom: 5px; }
-    .price-card p { margin-bottom: 10px; color: #c5c6c7; }
-    .price-card ul {
-      list-style: none;
-      text-align: left;
-      font-size: 0.9em;
-      margin-top: 10px;
-      color: #9fc;
+    .terminal .muted { color:#728391;font-family:Inter, sans-serif;font-weight:600; }
+
+    /* VPS info terminal area */
+    .vps-area { margin-top:18px; display:grid;grid-template-columns:1fr 380px; gap:18px; align-items:start; }
+
+    .specs { display:flex;flex-direction:column;gap:8px; }
+    .specs .row { display:flex;justify-content:space-between;color:var(--muted);padding:8px;border-radius:8px;background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.02); }
+
+    /* small helper */
+    .muted-text{ color:var(--muted); font-size:13px; }
+    .title { font-weight:900; color:#e7fdf9; font-size:16px; display:flex;align-items:center;gap:8px; }
+
+    /* responsive */
+    @media(max-width:1100px){
+      .app{grid-template-columns: 1fr; padding:16px;}
+      .grid{ grid-template-columns: 1fr; }
+      .vps-area{ grid-template-columns: 1fr; }
     }
-    .buy-btn {
-      display: inline-block;
-      background-color: #45a29e;
-      color: #0b0c10;
-      padding: 10px 18px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: bold;
-      margin-top: 12px;
-      transition: 0.2s;
-    }
-    .buy-btn:hover { background-color: #66fcf1; transform: scale(1.05); }
-    footer {
-      text-align: center;
-      padding: 20px;
-      color: #aaa;
-      background: rgba(31,40,51,0.7);
-      margin-top: 50px;
-      border-top: 1px solid #45a29e;
-    }
-    @media(max-width: 768px) {
-      header { font-size: 1.6em; }
-      .price-card { width: 90%; }
-    }
+
   </style>
 </head>
 <body>
-  <canvas id="particles"></canvas>
+  <div class="app">
 
-  <header>⚙️ Sagara Hosting Panel</header>
+    <!-- SIDEBAR -->
+    <aside class="sidebar" aria-label="Sidebar">
+      <div class="brand"><span class="dot"></span>Sagara Hosting Panel</div>
 
-  <div class="dashboard">
-    <div class="card">
-      <h2 style="color:#66fcf1;">📊 Uptime & Statistik</h2>
-      <canvas id="uptimeChart"></canvas>
-    </div>
+      <nav class="menu" role="navigation" aria-label="Main menu">
+        <button class="active" data-panel="overview">Overview <span class="badge">Live</span></button>
+        <button data-panel="servers">Servers</button>
+        <button data-panel="pricing">Pricing</button>
+        <button data-panel="vps">VPS Info</button>
+        <button data-panel="settings">Settings</button>
+        <button data-panel="help">Help</button>
+      </nav>
 
-    <div class="card">
-      <h2 style="color:#66fcf1;">💻 Terminal Server</h2>
-      <div class="terminal" id="terminal">
-        [INFO] Initializing Node.js Server v20.5.1...
+      <div class="foot">
+        <div class="muted-text">© 2025 Sagara</div>
+        <div class="muted-text">v1.0</div>
       </div>
-    </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- Topbar -->
+      <div class="topbar">
+        <div style="display:flex;gap:14px;align-items:center;width:100%;">
+          <div class="search card" style="flex:1;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.35-4.35" stroke="#6fe6df" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="11" r="6" stroke="#6fe6df" stroke-width="1.5"/></svg>
+            <input placeholder="Search servers, logs or invoices..." id="q" />
+          </div>
+        </div>
+
+        <div class="profile">
+          <div style="text-align:right;">
+            <div class="muted-text" style="font-size:13px">Welcome, Lilith</div>
+            <div style="font-weight:800;color:var(--accent-cyan)">Administrator</div>
+          </div>
+          <div class="avatar">LS</div>
+        </div>
+      </div>
+
+      <!-- Grid -->
+      <section id="panel-area">
+
+        <!-- OVERVIEW PANEL -->
+        <div id="overview" class="panel active">
+          <div class="grid">
+            <div>
+              <div class="card">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                  <div>
+                    <div class="title">Current Risk</div>
+                    <div class="muted-text">System health & threats</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div style="font-size:20px;font-weight:900;color:var(--accent-purple)">Score <span style="color:var(--accent-cyan)">741</span></div>
+                    <div class="muted-text">High</div>
+                  </div>
+                </div>
+
+                <div class="kpis" role="list">
+                  <div class="kpi">
+                    <div class="label">Total Threats</div>
+                    <div class="value">132%</div>
+                  </div>
+                  <div class="kpi">
+                    <div class="label">Video Risk</div>
+                    <div class="value">16%</div>
+                  </div>
+                  <div class="kpi">
+                    <div class="label">Image Risk</div>
+                    <div class="value">43%</div>
+                  </div>
+                </div>
+
+                <div class="chartWrap">
+                  <canvas id="uptimeLine"></canvas>
+                </div>
+              </div>
+
+              <div style="height:18px"></div>
+
+              <div class="card">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                  <div class="title">Server Terminal</div>
+                  <div class="muted-text">Realtime logs</div>
+                </div>
+                <div class="terminal" id="mainTerminal">[INFO] Initializing Sagara Node...</div>
+              </div>
+            </div>
+
+            <aside>
+              <div class="card small-card">
+                <div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div class="title">Threats by Virus</div>
+                    <div class="muted-text">Today</div>
+                  </div>
+                  <div style="height:12px"></div>
+                  <div class="donut">
+                    <canvas id="donut1"></canvas>
+                    <div style="flex:1">
+                      <div style="font-weight:900;font-size:18px;color:var(--accent-cyan)">65%</div>
+                      <div class="muted-text">Most detected: MyDoom</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="height:8px"></div>
+
+                <div>
+                  <div style="display:flex;justify-content:space-between;">
+                    <div class="title">Risk by Device</div>
+                    <div class="muted-text">Live</div>
+                  </div>
+                  <div style="height:12px"></div>
+                  <div style="display:flex;flex-direction:column;gap:8px;">
+                    <div style="display:flex;justify-content:space-between;"><div class="muted-text">Device-01</div><div style="font-weight:800;color:var(--accent-cyan)">42%</div></div>
+                    <div style="display:flex;justify-content:space-between;"><div class="muted-text">Device-02</div><div style="font-weight:800;color:var(--accent-purple)">31%</div></div>
+                    <div style="display:flex;justify-content:space-between;"><div class="muted-text">Device-03</div><div style="font-weight:800;color:#ffd66b">22%</div></div>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <!-- SERVERS PANEL (simple placeholder content) -->
+        <div id="servers" class="panel" style="display:none;">
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div class="title">Servers</div>
+                <div class="muted-text">Manage active nodes & clusters</div>
+              </div>
+              <div>
+                <button onclick="alert('Create server - demo')" style="padding:10px 12px;border-radius:8px;background:var(--accent-cyan);border:0;font-weight:800;color:#041018;cursor:pointer">Create Server</button>
+              </div>
+            </div>
+
+            <div style="margin-top:12px; display:flex;flex-direction:column;gap:12px;">
+              <!-- sample server cards -->
+              <div style="display:flex;gap:12px;align-items:center;">
+                <div style="width:8px;height:55px;background:linear-gradient(180deg,var(--accent-cyan),var(--accent-purple));border-radius:6px"></div>
+                <div style="flex:1;padding:12px;border-radius:8px;background:rgba(255,255,255,0.01);display:flex;justify-content:space-between;align-items:center;">
+                  <div>
+                    <div style="font-weight:800">Sagara-Node-01</div>
+                    <div class="muted-text">Ubuntu 24.04 • Singapore</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div style="font-weight:900;color:var(--accent-cyan)">ONLINE</div>
+                    <div class="muted-text">CPU 12% • RAM 18%</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:12px;align-items:center;">
+                <div style="width:8px;height:55px;background:linear-gradient(180deg,#ffd66b,#ff8a6b);border-radius:6px"></div>
+                <div style="flex:1;padding:12px;border-radius:8px;background:rgba(255,255,255,0.01);display:flex;justify-content:space-between;align-items:center;">
+                  <div>
+                    <div style="font-weight:800">Sagara-Edge-02</div>
+                    <div class="muted-text">Debian 12 • Tokyo</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div style="font-weight:900;color:#ffd66b">MAINT</div>
+                    <div class="muted-text">CPU 72% • RAM 64%</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PRICING PANEL -->
+        <div id="pricing" class="panel" style="display:none;">
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div class="title">Pricing Plans</div>
+                <div class="muted-text">Choose the best plan for your project</div>
+              </div>
+              <div class="muted-text">All payments via WA</div>
+            </div>
+
+            <div class="prices" role="list" style="margin-top:14px;">
+              <!-- list per user request -->
+              <div class="price-card" data-package="RAM 1GB" data-price="Rp 2.500">
+                <h4>RAM 1GB</h4>
+                <div class="price">Rp 2.500</div>
+                <ul>
+                  <li>Node.js terbaru</li>
+                  <li>VPS berkualitas</li>
+                  <li>Hemat kuota & penyimpanan</li>
+                  <li>Full Garansi</li>
+                </ul>
+                <a class="buy" onclick="buyNow(this)">Beli Sekarang</a>
+              </div>
+
+              <div class="price-card" data-package="RAM 3GB" data-price="Rp 6.000">
+                <h4>RAM 3GB</h4>
+                <div class="price">Rp 6.000</div>
+                <ul>
+                  <li>Node.js terbaru</li>
+                  <li>VPS berkualitas</li>
+                  <li>Hemat kuota & penyimpanan</li>
+                  <li>Full Garansi</li>
+                </ul>
+                <a class="buy" onclick="buyNow(this)">Beli Sekarang</a>
+              </div>
+
+              <div class="price-card" data-package="RAM 5GB" data-price="Rp 8.000">
+                <h4>RAM 5GB</h4>
+                <div class="price">Rp 8.000</div>
+                <ul>
+                  <li>Node.js terbaru</li>
+                  <li>VPS berkualitas</li>
+                  <li>Hemat kuota & penyimpanan</li>
+                  <li>Full Garansi</li>
+                </ul>
+                <a class="buy" onclick="buyNow(this)">Beli Sekarang</a>
+              </div>
+
+              <div class="price-card" data-package="RAM 10GB" data-price="Rp 10.000">
+                <h4>RAM 10GB</h4>
+                <div class="price">Rp 10.000</div>
+                <ul>
+                  <li>Node.js terbaru</li>
+                  <li>VPS berkualitas</li>
+                  <li>Hemat kuota & penyimpanan</li>
+                  <li>Full Garansi</li>
+                </ul>
+                <a class="buy" onclick="buyNow(this)">Beli Sekarang</a>
+              </div>
+
+              <div class="price-card" data-package="RAM Unlimited" data-price="Rp 15.000">
+                <h4>RAM Unlimited</h4>
+                <div class="price">Rp 15.000</div>
+                <ul>
+                  <li>Node.js terbaru</li>
+                  <li>VPS berkualitas</li>
+                  <li>Hemat kuota & penyimpanan</li>
+                  <li>Full Garansi</li>
+                </ul>
+                <a class="buy" onclick="buyNow(this)">Beli Sekarang</a>
+              </div>
+            </div>
+
+            <!-- additional benefits list -->
+            <div style="margin-top:16px; display:flex;gap:12px;flex-wrap:wrap;">
+              <div style="padding:12px;border-radius:10px;background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.02);">
+                <div style="font-weight:800">Keuntungan</div>
+                <div class="muted-text" style="margin-top:6px;">
+                  + menggunakan Node.js terbaru<br>+ VPS berkualitas<br>+ menghemat kuota dan penyimpanan<br>+ Full Garansi<br>+ server fast
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- VPS INFO PANEL -->
+        <div id="vps" class="panel" style="display:none;">
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div class="title">VPS Info — Premium Node</div>
+                <div class="muted-text">Spesifikasi VPS terbaik (sample)</div>
+              </div>
+              <div class="muted-text">Singapore • Tier IV</div>
+            </div>
+
+            <div class="vps-area">
+              <div>
+                <div style="margin-top:14px;">
+                  <div class="terminal" id="vpsTerminal">
+[VPS] Loading Sagara Premium Node...
+                  </div>
+                </div>
+
+                <div style="margin-top:12px;">
+                  <div class="card" style="padding:12px;">
+                    <div class="title">Performance Overview</div>
+                    <div style="display:flex;gap:12px;margin-top:10px;">
+                      <div style="flex:1">
+                        <div class="muted-text">CPU Usage</div>
+                        <div style="font-weight:900;color:var(--accent-cyan)">12%</div>
+                      </div>
+                      <div style="flex:1">
+                        <div class="muted-text">Memory</div>
+                        <div style="font-weight:900;color:var(--accent-purple)">23%</div>
+                      </div>
+                      <div style="flex:1">
+                        <div class="muted-text">Network</div>
+                        <div style="font-weight:900;color:#ffd66b">1.2Gbps</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <aside>
+                <div class="card">
+                  <div class="title">Specs</div>
+                  <div style="height:8px"></div>
+                  <div class="specs">
+                    <div class="row"><div class="muted-text">Name</div><div><strong>Sagara-Node-01</strong></div></div>
+                    <div class="row"><div class="muted-text">Operating System</div><div>Ubuntu Server 24.04 LTS (64-bit)</div></div>
+                    <div class="row"><div class="muted-text">Kernel</div><div>Linux 6.8.0-32-generic</div></div>
+                    <div class="row"><div class="muted-text">CPU</div><div>AMD EPYC 9654P — 96 Cores @ up to 3.7GHz</div></div>
+                    <div class="row"><div class="muted-text">GPU</div><div>NVIDIA RTX A6000 — 48GB GDDR6</div></div>
+                    <div class="row"><div class="muted-text">RAM</div><div>128GB DDR5 6400MHz</div></div>
+                    <div class="row"><div class="muted-text">Storage</div><div>2 x 2TB NVMe Gen4 (RAID 1)</div></div>
+                    <div class="row"><div class="muted-text">Bandwidth</div><div>10Gbps Unmetered</div></div>
+                    <div class="row"><div class="muted-text">Uptime SLA</div><div>99.99%</div></div>
+                    <div class="row"><div class="muted-text">Security</div><div>DDoS Mitigation • Auto Backups</div></div>
+                    <div class="row"><div class="muted-text">Location</div><div>Singapore — Tier IV Datacenter</div></div>
+                  </div>
+                </div>
+              </aside>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- SETTINGS PANEL (placeholder) -->
+        <div id="settings" class="panel" style="display:none;">
+          <div class="card">
+            <div class="title">Settings</div>
+            <div class="muted-text" style="margin-top:8px">Customize your dashboard</div>
+            <div style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap">
+              <button onclick="alert('Not implemented in demo')" style="padding:10px 12px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);cursor:pointer">Theme</button>
+              <button onclick="alert('Not implemented in demo')" style="padding:10px 12px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);cursor:pointer">Notifications</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- HELP PANEL -->
+        <div id="help" class="panel" style="display:none;">
+          <div class="card">
+            <div class="title">Help & Support</div>
+            <div class="muted-text" style="margin-top:8px">Butuh bantuan? Hubungi via WhatsApp</div>
+            <div style="margin-top:14px">
+              <button onclick="window.open('https://wa.me/6287840275933','_blank')" style="padding:12px 16px;border-radius:10px;background:linear-gradient(90deg,var(--accent-cyan),var(--accent-purple));border:0;font-weight:800;color:#041018;cursor:pointer">Hubungi Support</button>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- VPS Info Terminal (duplicate below pricing as requested) -->
+      <div style="margin-top:18px;">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div class="title">VPS Info (Terminal)</div>
+              <div class="muted-text">Informasi VPS terbagus — otomatis tampil di bawah pricing</div>
+            </div>
+            <div class="muted-text">Realtime snapshot</div>
+          </div>
+
+          <div style="margin-top:14px;">
+            <div class="terminal" id="infoTerminal">
+[VPS] Booting Sagara Premium Node...
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
   </div>
 
-  <section class="prices">
-    <div class="price-card" data-package="RAM 1GB - Rp 2.500">
-      <h3>RAM 1GB</h3>
-      <p>Harga: Rp 2.500</p>
-      <ul>
-        <li>Node.js terbaru</li>
-        <li>VPS berkualitas</li>
-        <li>Hemat kuota & penyimpanan</li>
-        <li>Full Garansi</li>
-        <li>Server Fast</li>
-      </ul>
-      <a href="#" class="buy-btn" onclick="buyNow(this)">Beli Sekarang</a>
-    </div>
-
-    <div class="price-card" data-package="RAM 3GB - Rp 6.000">
-      <h3>RAM 3GB</h3>
-      <p>Harga: Rp 6.000</p>
-      <ul>
-        <li>Node.js terbaru</li>
-        <li>VPS berkualitas</li>
-        <li>Hemat kuota & penyimpanan</li>
-        <li>Full Garansi</li>
-        <li>Server Fast</li>
-      </ul>
-      <a href="#" class="buy-btn" onclick="buyNow(this)">Beli Sekarang</a>
-    </div>
-
-    <div class="price-card" data-package="RAM 5GB - Rp 8.000">
-      <h3>RAM 5GB</h3>
-      <p>Harga: Rp 8.000</p>
-      <ul>
-        <li>Node.js terbaru</li>
-        <li>VPS berkualitas</li>
-        <li>Hemat kuota & penyimpanan</li>
-        <li>Full Garansi</li>
-        <li>Server Fast</li>
-      </ul>
-      <a href="#" class="buy-btn" onclick="buyNow(this)">Beli Sekarang</a>
-    </div>
-
-    <div class="price-card" data-package="RAM 10GB - Rp 10.000">
-      <h3>RAM 10GB</h3>
-      <p>Harga: Rp 10.000</p>
-      <ul>
-        <li>Node.js terbaru</li>
-        <li>VPS berkualitas</li>
-        <li>Hemat kuota & penyimpanan</li>
-        <li>Full Garansi</li>
-        <li>Server Fast</li>
-      </ul>
-      <a href="#" class="buy-btn" onclick="buyNow(this)">Beli Sekarang</a>
-    </div>
-
-    <div class="price-card" data-package="RAM Unlimited - Rp 15.000">
-      <h3>RAM Unlimited</h3>
-      <p>Harga: Rp 15.000</p>
-      <ul>
-        <li>Node.js terbaru</li>
-        <li>VPS berkualitas</li>
-        <li>Hemat kuota & penyimpanan</li>
-        <li>Full Garansi</li>
-        <li>Server Fast</li>
-      </ul>
-      <a href="#" class="buy-btn" onclick="buyNow(this)">Beli Sekarang</a>
-    </div>
-  </section>
-
-  <div class="dashboard" style="max-width:900px;">
-    <div class="card">
-      <h2 style="color:#66fcf1;">🧠 VPS Info Terminal</h2>
-      <div class="terminal" id="vpsTerminal">
-        [VPS] Fetching system information...
-      </div>
-    </div>
-  </div>
-
-  <footer>© 2025 Sagara Hosting | Designed by Lilith Sagara</footer>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // Chart uptime
-    const ctx = document.getElementById('uptimeChart');
-    new Chart(ctx, {
+    // --- Panel nav behavior ---
+    const menuButtons = document.querySelectorAll('.menu button');
+    const panels = document.querySelectorAll('.panel');
+
+    menuButtons.forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        menuButtons.forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        const panelId = btn.getAttribute('data-panel');
+
+        panels.forEach(p=>{
+          if(p.id === panelId){
+            p.style.display = ''; // default
+          } else {
+            p.style.display = 'none';
+          }
+        });
+
+        // scroll top of main for UX
+        window.scrollTo({top:0, behavior:'smooth'});
+      });
+    });
+
+    // --- Chart: uptime line ---
+    const uptimeCtx = document.getElementById('uptimeLine').getContext('2d');
+    const uptimeChart = new Chart(uptimeCtx, {
       type: 'line',
       data: {
-        labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+        labels: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'],
         datasets: [{
-          label: 'Uptime (%)',
-          data: [99.9, 100, 99.8, 99.9, 100, 100, 99.9],
+          label: 'Uptime %',
+          data: [99.9,100,99.8,99.95,99.97,99.99,100,99.98,99.99,100,99.97,99.99],
           borderColor: '#66fcf1',
-          borderWidth: 2,
-          fill: false,
-          tension: 0.4
+          tension:0.35,
+          pointRadius:3,
+          borderWidth:2,
+          fill: true,
+          backgroundColor: 'rgba(102,252,241,0.04)'
         }]
       },
       options: {
-        scales: {
-          y: { beginAtZero: true, max: 100, ticks: { color: '#c5c6c7' }, grid: { color: '#1f2833' } },
-          x: { ticks: { color: '#c5c6c7' }, grid: { color: '#1f2833' } }
-        },
-        plugins: { legend: { labels: { color: '#c5c6c7' } } }
+        responsive:true,
+        plugins:{legend:{display:false}},
+        scales:{
+          x:{ grid:{ color:'rgba(255,255,255,0.02)', display:true }, ticks:{ color:'#a8bbbf' } },
+          y:{ min:99.5, max:100, grid:{ color:'rgba(255,255,255,0.02)' }, ticks:{ color:'#a8bbbf' } }
+        }
       }
     });
 
-    // Terminal simulasi
-    const terminal = document.getElementById('terminal');
-    const logs = [
+    // --- Donut chart ---
+    const donutCtx = document.getElementById('donut1').getContext('2d');
+    const donut = new Chart(donutCtx, {
+      type:'doughnut',
+      data:{
+        labels:['MyDoom','Melissa','LOVEOU','Others'],
+        datasets:[{
+          data:[38,18,9,35],
+          backgroundColor:['#66fcf1','#8a6cff','#ffd66b','#6fd2b9'],
+          hoverOffset:6
+        }]
+      },
+      options:{plugins:{legend:{display:false}}}
+    });
+
+    // --- Terminal main loop (top) ---
+    const mainTerminal = document.getElementById('mainTerminal');
+    const mainLogs = [
       '[SERVER] Starting process...',
       '[SYSTEM] Checking dependencies...',
-      '[NODE] Node.js 20.5.1 loaded successfully.',
+      '[NODE] Node.js 20.5.1 loaded.',
       '[HOST] Connected to VPS cluster.',
-      '[DATA] Syncing with database...',
-      '[PING] Server response OK.',
-      '[SERVER] Looping process active...'
+      '[DATA] Syncing clients...',
+      '[PING] Response: 12ms',
+      '[SERVER] Looping process active...',
+      '[WATCHDOG] All systems nominal.'
     ];
-    let i = 0;
-    setInterval(() => {
-      terminal.textContent += '\n' + logs[i % logs.length];
-      terminal.scrollTop = terminal.scrollHeight;
-      i++;
+    let m = 0;
+    setInterval(()=>{
+      mainTerminal.textContent += '\\n' + mainLogs[m % mainLogs.length];
+      mainTerminal.scrollTop = mainTerminal.scrollHeight;
+      m++;
     }, 1200);
 
-    // Terminal VPS Info
+    // --- VPS Terminal (panel vps) ---
     const vpsTerminal = document.getElementById('vpsTerminal');
-    const vpsInfo = [
+    const vpsLines = [
       '[SYSTEM] Sagara VPS Information Loaded',
       '[VPS NAME] Sagara-Node-01',
       '[OS] Ubuntu Server 24.04 LTS (64-bit)',
       '[KERNEL] Linux 6.8.0-32-generic',
-      '[CPU] AMD EPYC™ 9654P 96-Core @ 3.7GHz',
-      '[GPU] NVIDIA RTX A6000 48GB GDDR6',
+      '[CPU] AMD EPYC™ 9654P — 96-Core @ up to 3.7GHz',
+      '[GPU] NVIDIA RTX A6000 — 48GB GDDR6',
       '[RAM] 128GB DDR5 6400MHz',
       '[STORAGE] 2TB NVMe Gen4 SSD (RAID 1)',
       '[BANDWIDTH] 10Gbps Unmetered',
-      '[UPTIME GUARANTEE] 99.99%',
-      '[LOCATION] Singapore Datacenter - Tier IV',
+      '[UPTIME SLA] 99.99%',
+      '[LOCATION] Singapore Datacenter — Tier IV',
       '[SECURITY] DDoS Protection + Auto Backup Enabled',
       '[STATUS] ONLINE ✅'
     ];
-    let j = 0;
-    const vpsLoop = setInterval(() => {
-      if (j < vpsInfo.length) {
-        vpsTerminal.textContent += '\n' + vpsInfo[j];
-        vpsTerminal.scrollTop = vpsTerminal.scrollHeight;
-        j++;
-      } else {
-        clearInterval(vpsLoop);
-      }
-    }, 800);
+    (function displayVPS(){
+      let idx=0;
+      const iv = setInterval(()=>{
+        if(idx < vpsLines.length){
+          vpsTerminal.textContent += '\\n' + vpsLines[idx];
+          vpsTerminal.scrollTop = vpsTerminal.scrollHeight;
+          idx++;
+        } else {
+          clearInterval(iv);
+        }
+      }, 600);
+    })();
 
-    // WhatsApp
-    function buyNow(el) {
-      const pkg = el.parentElement.getAttribute('data-package');
-      const text = encodeURIComponent("Kak aku mau beli " + pkg);
+    // --- Info terminal (below pricing) ---
+    const infoTerminal = document.getElementById('infoTerminal');
+    const infoLines = [
+      '[VPS] Boot sequence start...',
+      '[VPS] Hardware check OK',
+      '[VPS] Network handshake with edge nodes: OK',
+      '[VPS] Secure tunnel established',
+      '[VPS] Services: nginx, node, docker loaded',
+      '[VPS] Backups scheduled: daily 02:00 UTC',
+      '[VPS] Snapshot ID: sagara-snap-2025-06-12',
+      '[VPS] Health: Optimal — No alerts'
+    ];
+    let k=0;
+    setInterval(()=>{
+      if(k < infoLines.length){
+        infoTerminal.textContent += '\\n' + infoLines[k];
+        infoTerminal.scrollTop = infoTerminal.scrollHeight;
+        k++;
+      } else if(k === infoLines.length){
+        // keep looping a short status line to simulate live
+        infoTerminal.textContent += '\\n' + '[VPS] Live monitor: CPU 12% | RAM 23% | NET 1.2Gbps';
+        infoTerminal.scrollTop = infoTerminal.scrollHeight;
+        k++;
+      } else {
+        // occasionally append periodic heartbeat
+        if(Math.random() > 0.85){
+          infoTerminal.textContent += '\\n' + '[VPS] Heartbeat: OK • ' + new Date().toLocaleTimeString();
+          infoTerminal.scrollTop = infoTerminal.scrollHeight;
+        }
+      }
+    }, 1000);
+
+    // --- Buy now button behavior (WA link) ---
+    function buyNow(el){
+      const pkg = el.parentElement.getAttribute('data-package') || el.parentElement.getAttribute('data-package');
+      const text = encodeURIComponent("kak aku mau beli " + pkg);
+      // number provided earlier: 6287840275933
       window.open(`https://wa.me/6287840275933?text=${text}`, '_blank');
     }
 
-    // Animasi partikel background
-    const canvas = document.getElementById('particles');
-    const ctx2 = canvas.getContext('2d');
-    let particlesArray = [];
-    const particleCount = 80;
-    function resizeCanvas() { canvas.width = innerWidth; canvas.height = innerHeight; }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-    class Particle {
-      constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2 + 1;
-        this.speedX = (Math.random() - 0.5);
-        this.speedY = (Math.random() - 0.5);
+    // --- small nicety: enter to focus search ---
+    document.getElementById('q').addEventListener('keydown', function(e){
+      if(e.key === 'Enter') {
+        alert('Search demo: ' + this.value);
       }
-      update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-      }
-      draw() {
-        ctx2.beginPath();
-        ctx2.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx2.fillStyle = '#45a29e';
-        ctx2.fill();
-      }
-    }
-    function initParticles() {
-      particlesArray = [];
-      for (let i = 0; i < particleCount; i++) particlesArray.push(new Particle());
-    }
-    function connectParticles() {
-      for (let a = 0; a < particlesArray.length; a++) {
-        for (let b = a; b < particlesArray.length; b++) {
-          const dx = particlesArray[a].x - particlesArray[b].x;
-          const dy = particlesArray[a].y - particlesArray[b].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 100) {
-            ctx2.strokeStyle = 'rgba(102,252,241,0.1)';
-            ctx2.lineWidth = 1;
-            ctx2.beginPath();
-            ctx2.moveTo(particlesArray[a].x, particlesArray[a].y);
-            ctx2.lineTo(particlesArray[b].x, particlesArray[b].y);
-            ctx2.stroke();
-          }
-        }
-      }
-    }
-    function animateParticles() {
-      ctx2.clearRect(0, 0, canvas.width, canvas.height);
-      for (let p of particlesArray) { p.update(); p.draw(); }
-      connectParticles();
-      requestAnimationFrame(animateParticles);
-    }
-    initParticles();
-    animateParticles();
+    });
+
+    // Accessibility: set first panel visible on load
+    document.addEventListener('DOMContentLoaded', ()=>{
+      document.querySelectorAll('.panel').forEach(p=>{ if(p.style.display === '') p.style.display=''; });
+    });
+
   </script>
 </body>
 </html>
